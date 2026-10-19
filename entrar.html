@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sorteio SdB 2026</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap">
+<style>
+:root{--bg:#eaf3fd;--panel:#fff;--fg:#0f2a52;--muted:#5a7396;--line:#cfdff3;--accent:#1f5fd1}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(180deg,#a9d2ff,#eaf3fd 55%);color:var(--fg);font-family:"Plus Jakarta Sans",system-ui,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:var(--panel);border-radius:22px;padding:28px 22px;width:100%;max-width:420px;box-shadow:0 12px 40px rgba(15,42,82,.18)}
+small{display:block;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:var(--muted);font-size:12px;margin-bottom:6px}
+h1{margin:0 0 6px;font-size:28px;line-height:1.1;font-weight:800}
+p{margin:0 0 18px;color:var(--muted);line-height:1.4}
+label{font-weight:700;font-size:14px;display:block;margin-bottom:6px}
+input{width:100%;font:inherit;font-size:18px;padding:14px;border:2px solid var(--line);border-radius:12px;color:var(--fg);background:#fff}
+input:focus{outline:none;border-color:var(--accent)}
+button{width:100%;margin-top:14px;font:inherit;font-weight:800;font-size:18px;padding:14px;border:0;border-radius:999px;background:var(--accent);color:#fff;cursor:pointer}
+button:disabled{opacity:.5}
+.msg{margin-top:14px;font-weight:700;min-height:1.3em}
+.ok{color:#14803c}.err{color:#b42318}
+</style>
+</head>
+<body>
+<div class="card">
+  <small>9ª Semana de Biotecnologia</small>
+  <h1>Sorteio de brindes</h1>
+  <p>Digite seu nome completo para concorrer. Depois, fique de olho no telão!</p>
+  <form id="f">
+    <label for="nome">Nome completo</label>
+    <input id="nome" autocomplete="name" maxlength="80" required placeholder="Ex.: Maria Souza">
+    <button id="b" type="submit">Participar</button>
+  </form>
+  <div class="msg" id="m" role="status"></div>
+</div>
+<script>
+var DB='https://sdb-sorteio-default-rtdb.firebaseio.com';
+var f=document.getElementById('f'),m=document.getElementById('m'),b=document.getElementById('b'),inp=document.getElementById('nome');
+f.addEventListener('submit',function(e){
+  e.preventDefault();
+  var name=inp.value.replace(/\s+/g,' ').trim();
+  if(name.length<2){m.className='msg err';m.textContent='Digite seu nome completo.';return}
+  var key=name.toLowerCase().replace(/[.$#\[\]\/]/g,'');
+  b.disabled=true;m.className='msg';m.textContent='Enviando…';
+  fetch(DB+'/names/'+encodeURIComponent(key)+'.json',{method:'PUT',body:JSON.stringify({name:name,t:{'.sv':'timestamp'}})})
+  .then(function(r){if(!r.ok)throw 0;m.className='msg ok';m.textContent='Pronto, '+name.split(' ')[0]+'! Você está concorrendo.';inp.value='';try{localStorage.setItem('sdb_done',name)}catch(e){}})
+  .catch(function(){m.className='msg err';m.textContent='Não deu certo. Verifique a internet e tente de novo.';b.disabled=false});
+});
+</script>
+</body>
+</html>
